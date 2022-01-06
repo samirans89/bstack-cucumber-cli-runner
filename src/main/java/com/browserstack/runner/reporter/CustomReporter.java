@@ -69,8 +69,6 @@ public class CustomReporter {
             }
 
         });
-
-
     }
 
     private void generateHtmlReport(CucumberCLIRunner customParallelRunner) throws IOException {
@@ -111,15 +109,15 @@ public class CustomReporter {
         reportData.put("rerun", rerunScenarioCount);
         reportData.put("timestamp", Instant.now().toString());
         reportData.put("duration", duration);
-        reportData.put("pools", customParallelRunner.getCustomMaxRunnersCount());
-        reportData.put("threads", customParallelRunner.getCucumberMaxRunnersCount());
+        reportData.put("pools", customParallelRunner.getCliRunnerExecutorPools());
+        reportData.put("threads", customParallelRunner.getCliRunnerCucumberThreads());
         reportData.put("run_level", "Scenarios");
         reportData.put("os_name", System.getProperty("os.name"));
         reportData.put("os_arch", System.getProperty("os.arch"));
         reportData.put("java_version", System.getProperty("java.version"));
         reportData.put("cucumber_version", System.getProperty("cucumber.version"));
-        reportData.put("tags", !customParallelRunner.getCucumberRunTags().isEmpty() ? customParallelRunner.getCucumberRunTags() : "<None>");
-        reportData.put("features", customParallelRunner.getFeatureFilePath());
+        reportData.put("tags", System.getProperty("cucumber.tags", "<None>"));
+        reportData.put("features", System.getProperty("cucumber.features", ""));
         reportData.put("results", results);
         reportData.put("modals", modals);
 

@@ -24,7 +24,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <src.dir>src/main</src.dir>
+        <src.dir>src</src.dir>
     </properties>
 
     <dependencies>

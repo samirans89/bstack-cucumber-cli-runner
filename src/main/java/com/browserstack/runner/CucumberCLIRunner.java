@@ -33,12 +33,12 @@ public class CucumberCLIRunner extends Runner {
 
     private final Instant sessionStartTime;
 
-    private final String featureFilePath = System.getProperty("cucumber.features", "");
-    private final String stepDefinitionsFilePath = System.getProperty("cucumber.glue", "");
-    private final String cucumberRunTags = System.getProperty("cucumber.filter.tags", "");
+    private final String runnerTestListenerPlugin = "com.browserstack.runner.listener.TestEventListener";
 
-    private final int customMaxRunnersCount = Integer.parseInt(System.getProperty("parallel.custom.runners", "2"));
-    private final int cucumberMaxRunnersCount = Integer.parseInt(System.getProperty("parallel.cucumber.runners", "2"));
+    private final int cliRunnerExecutorPools = Integer.parseInt(System.getProperty("cli-runner.executor.pools", "2"));
+
+    private final int cliRunnerCucumberThreads = Integer.parseInt(System.getProperty("cli-runner.cucumber.threads", "2"));
+
 
     public final Class<RunCucumberTest> runnerClass;
     public static final Object threadLock = new Object();
@@ -77,10 +77,10 @@ public class CucumberCLIRunner extends Runner {
 
     public void createExecutorPools() throws IOException {
 
-        ExecutorService pool = Executors.newFixedThreadPool(customMaxRunnersCount);
+        ExecutorService pool = Executors.newFixedThreadPool(cliRunnerExecutorPools);
 
         String absolutePath = Paths.get(System.getProperty("user.dir")).toAbsolutePath().toString();
-        String featuresParentDirectory = absolutePath + File.separator + featureFilePath;
+        String featuresParentDirectory = absolutePath + File.separator + System.getProperty("cucumber.features", "");
         List<String> files = RunnerUtils.findFiles(Paths.get(featuresParentDirectory), "feature");
 
         webDriverFactory.getPlatforms().forEach(platform -> {
@@ -94,15 +94,13 @@ public class CucumberCLIRunner extends Runner {
                 );
 
                 String[] cucumberRunParams = new String[]{
-                        CommandlineOptions.GLUE
-                        , stepDefinitionsFilePath
-                        , featureFile
+                        featureFile
                         , CommandlineOptions.PLUGIN
                         , jsonReportFile
+                        , CommandlineOptions.PLUGIN
+                        , runnerTestListenerPlugin
                         , CommandlineOptions.THREADS
-                        , String.valueOf(cucumberMaxRunnersCount)
-                        , CommandlineOptions.TAGS
-                        , cucumberRunTags
+                        , String.valueOf(cliRunnerCucumberThreads)
                 };
                 pool.submit(new Task(cucumberRunParams));
             }
@@ -126,7 +124,7 @@ public class CucumberCLIRunner extends Runner {
 
     private void createRerunFailedExecutorPools() throws IOException {
 
-        ExecutorService pool = Executors.newFixedThreadPool(customMaxRunnersCount);
+        ExecutorService pool = Executors.newFixedThreadPool(cliRunnerExecutorPools);
         List<String> files = RunnerUtils.findFiles(Paths.get(RERUN_SCENARIOS_DIR), "txt");
         files.stream().map(File::new).forEach(rerunTxtFile -> {
             Scanner sc;
@@ -142,15 +140,13 @@ public class CucumberCLIRunner extends Runner {
                             , jsonFileName.substring(jsonFileName.lastIndexOf("/") + 1));
 
                     String[] cucumberRunParams = new String[]{
-                            CommandlineOptions.GLUE
-                            , stepDefinitionsFilePath
-                            , scenarioId
+                             scenarioId
                             , CommandlineOptions.PLUGIN
                             , jsonReportFile
+                            , CommandlineOptions.PLUGIN
+                            , runnerTestListenerPlugin
                             , CommandlineOptions.THREADS
-                            , String.valueOf(cucumberMaxRunnersCount)
-                            , CommandlineOptions.TAGS
-                            , cucumberRunTags
+                            , String.valueOf(cliRunnerCucumberThreads)
                     };
                     pool.submit(new Task(cucumberRunParams));
                 }
@@ -176,20 +172,13 @@ public class CucumberCLIRunner extends Runner {
         new ReportUtil().create(this);
     }
 
-    public String getCucumberRunTags() {
-        return cucumberRunTags;
+
+    public int getCliRunnerExecutorPools() {
+        return cliRunnerExecutorPools;
     }
 
-    public String getFeatureFilePath() {
-        return featureFilePath;
-    }
-
-    public int getCustomMaxRunnersCount() {
-        return customMaxRunnersCount;
-    }
-
-    public int getCucumberMaxRunnersCount() {
-        return cucumberMaxRunnersCount;
+    public int getCliRunnerCucumberThreads() {
+        return cliRunnerCucumberThreads;
     }
 
     public Instant getSessionStartTime() {
