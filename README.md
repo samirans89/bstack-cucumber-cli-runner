@@ -69,10 +69,14 @@ The below System properties are expected by the Cucumber CLI framework.
 The below Cucumber properties are recommended by the framework.
 ```shell
 # Used to display the Cucumber version in Custom HTML reporting.
--Dcucumber.version=<cucumber-version> 
+-Dcucumber.version=<cucumber-version> # Default: "" 
+
+
+# Used to set the executor pools set by the cli-runner
+-Dcli-runner.executor.pools=<max-threads-created-by-cli-runner> # Default: 1
 
 # Creates multiple Cucumber threads which enables 
 # Cucumber scenarios or Scenario Outline examples
 # to run in parallel.
--Dcucumber.threads=<cucumber-threads-max-count> 
+-Dcli-runner.cucumber.threads=<max-threads-created-by-cucumber> # Default: 1
 ```

@@ -35,9 +35,9 @@ public class CucumberCLIRunner extends Runner {
 
     private final String runnerTestListenerPlugin = "com.browserstack.runner.listener.TestEventListener";
 
-    private final int cliRunnerExecutorPools = Integer.parseInt(System.getProperty("cli-runner.executor.pools", "2"));
+    private final int cliRunnerExecutorPools = Integer.parseInt(System.getProperty("cli-runner.executor.pools", "1"));
 
-    private final int cliRunnerCucumberThreads = Integer.parseInt(System.getProperty("cli-runner.cucumber.threads", "2"));
+    private final int cliRunnerCucumberThreads = Integer.parseInt(System.getProperty("cli-runner.cucumber.threads", "1"));
 
 
     public final Class<RunCucumberTest> runnerClass;
