@@ -77,7 +77,7 @@ WebDriverRuntime|Entry point for running tests
 WebDriverTestRunner|External Facing API
 
 
-*How to run a test with this library?*
+**How to run a test with this library?**
 
 1.Clone this repository
 

@@ -14,8 +14,8 @@
         <wedriver.core.version>0.0.1</wedriver.core.version>
         <selenium-java.version>3.141.59</selenium-java.version>
         <cucumber.version>6.11.0</cucumber.version>
-        <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.12.2</jackson.version>
         <mustache-java.version>0.9.10</mustache-java.version>
     </properties>
