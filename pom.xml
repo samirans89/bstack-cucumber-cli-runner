@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.browserstack</groupId>
-    <artifactId>webdriver-framework-cucumber-java</artifactId>
+    <artifactId>bstack-cucumber-cli-runner</artifactId>
     <version>0.0.1</version>
 
     <properties>
