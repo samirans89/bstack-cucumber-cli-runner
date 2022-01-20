@@ -2,26 +2,19 @@ package com.browserstack.report;
 
 import com.browserstack.*;
 import com.browserstack.report.builder.CustomReportBuilder;
-import com.browserstack.report.models.Feature;
-import com.browserstack.report.models.ModelUtil;
-import com.browserstack.report.models.Scenario;
+import com.browserstack.report.models.*;
 import com.browserstack.report.models.Step;
 import com.browserstack.webdriver.core.WebDriverFactory;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.plugin.ConcurrentEventListener;
-import io.cucumber.plugin.event.EventPublisher;
-import io.cucumber.plugin.event.TestCaseFinished;
-import io.cucumber.plugin.event.TestStepFinished;
+import io.cucumber.plugin.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CustomReportListener implements ConcurrentEventListener {
 
@@ -36,6 +29,7 @@ public class CustomReportListener implements ConcurrentEventListener {
     private String reportPath;
     private ThreadLocal<Execution> currentExecution=new ThreadLocal<>();
     private ThreadLocal<List<Step>> currentSteps = new ThreadLocal<>();
+    private ThreadLocal<List<Embedding>> currentEmbeddings = new ThreadLocal<>();
 
     public CustomReportListener(String reportPath) {
         this.reportPath = reportPath;
@@ -47,9 +41,23 @@ public class CustomReportListener implements ConcurrentEventListener {
         publisher.registerHandlerFor(RuntimeCreated.class, this::handleRuntimeCreatedEvent);
         publisher.registerHandlerFor(BatchExecutionStarted.class, this::recordCurrentBatch);
         publisher.registerHandlerFor(ExecutionStarted.class, this::recordFeatures);
+        publisher.registerHandlerFor(TestStepStarted.class,this::addEmbedding);
         publisher.registerHandlerFor(TestStepFinished.class, this::recordStep);
         publisher.registerHandlerFor(TestCaseFinished.class, this::recordTestCase);
         publisher.registerHandlerFor(BuildCompleted.class, this::generateReports);
+        publisher.registerHandlerFor(EmbedEvent.class,this::embedOutput);
+    }
+
+    private void addEmbedding(TestStepStarted testStepStarted) {
+        currentEmbeddings.set(new ArrayList<>());
+    }
+
+    private void embedOutput(EmbedEvent embedEvent) {
+        Embedding embedding = new Embedding();
+        embedding.setEmbeddingId(UUID.randomUUID().toString());
+        embedding.setData(embedEvent.getData());
+        embedding.setMimeType(embedEvent.getMediaType());
+        currentEmbeddings.get().add(embedding);
     }
 
     private void recordBuildStart(BuildStarted buildStarted) {
@@ -74,7 +82,10 @@ public class CustomReportListener implements ConcurrentEventListener {
         if (currentSteps.get()==null){
             currentSteps.set(new ArrayList<>());
         }
-        currentSteps.get().add(ModelUtil.convertStep(testStepFinished));
+        Step step = ModelUtil.convertStep(testStepFinished);
+        step.getEmbeddings().addAll(currentEmbeddings.get());
+        currentSteps.get().add(step);
+        currentEmbeddings.remove();
     }
 
     private void recordTestCase(TestCaseFinished testCaseFinished) {

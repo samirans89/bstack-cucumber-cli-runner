@@ -37,11 +37,7 @@ public class ModelUtil {
             step.setKeyword(hookTestStep.getHookType().toString());
             step.setName(hookTestStep.getCodeLocation());
         }
-        //step.setName(testStepFinished.getTestStep().getCodeLocation());
         step.setResult(convertResult(testStepFinished));
-        step.getOutput().add("Sample Output");
-        //step.getEmbeddings().add(new Embedding());
-        step.getRowData().add("Sample Raw Data");
         return step;
     }
 

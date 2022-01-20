@@ -2,7 +2,8 @@ package com.browserstack;
 
 import com.browserstack.webdriver.core.WebDriverFactory;
 import io.cucumber.core.eventbus.EventBus;
-import io.cucumber.core.exception.CucumberException;
+import io.cucumber.core.exception.ExceptionUtils;
+import io.cucumber.core.exception.UnrecoverableExceptions;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.CucumberExecutionContext;
 import org.openqa.selenium.WebDriver;
@@ -10,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -95,15 +93,26 @@ public class BatchExecutionRunner {
     }
 
     public void closeExecutionContext() {
-        try {
-            this.context.finishTestRun();
-            CucumberException exception = this.context.getException();
-            if (exception != null) {
-                throw exception;
-            }
+        CucumberExecutionContext executionContext = this.context;
+        Objects.requireNonNull(executionContext);
+        this.execute(executionContext::runAfterAllHooks);
+        executionContext = this.context;
+        Objects.requireNonNull(executionContext);
+        this.execute(executionContext::finishTestRun);
+        Throwable exception = this.context.getThrowable();
+        if (exception != null) {
+            ExceptionUtils.throwAsUncheckedException(exception);
+        }else {
             LOGGER.debug("Cucumber feature execution completed");
-        } finally {
-            eventBus.send(new BuildCompleted(Instant.now()));
+        }
+        eventBus.send(new BuildCompleted(Instant.now()));
+    }
+
+    private void execute(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable var3) {
+            UnrecoverableExceptions.rethrowIfUnrecoverable(var3);
         }
     }
 

@@ -4,7 +4,7 @@ package com.browserstack.report.models;
 public class Embedding {
 
     private String embeddingId;
-    private String data;
+    private byte[] data;
     private String mimeType;
 
     public Embedding() {
@@ -18,11 +18,11 @@ public class Embedding {
         this.embeddingId = embeddingId;
     }
 
-    public String getData() {
+    public byte[] getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(byte[] data) {
         this.data = data;
     }
 

@@ -1,19 +1,35 @@
 package com.browserstack.report.builder;
 
 import com.browserstack.report.RunTimeInfo;
+import com.browserstack.report.models.Embedding;
 import com.browserstack.report.models.Feature;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomReportBuilder {
 
-    String SOURCE_ASSETS_DIRECTORY = "target/test-classes/reporter";
+    List<String> SOURCE_CSS_ASSETS = new ArrayList<>(
+            Arrays.asList("report/css/chartjs.min.css"
+                    , "report/css/dataTables.bootstrap4.min.css"
+                    , "report/css/report.min.css"));
+
+    List<String> SOURCE_JS_ASSETS = new ArrayList<>(
+            Arrays.asList("report/js/bootstrap.bundle.min.js"
+                    , "report/js/chart.min.js"
+                    , "report/js/dataTables.bootstrap4.min.js"
+                    , "report/js/jquery.dataTables.min.js"
+                    , "report/js/jquery-3.5.1.slim.min.js"));
+
 
     private CustomReportBuilder() {
     }
@@ -24,22 +40,28 @@ public class CustomReportBuilder {
     }
 
     private void create(String reportPath, String platform, RunTimeInfo runTimeInfo, List<Feature> features) throws IOException {
-        createDirectories(reportPath);
-        copyAssetsDirectory(SOURCE_ASSETS_DIRECTORY + "/css", reportPath + "/css");
-        copyAssetsDirectory(SOURCE_ASSETS_DIRECTORY + "/js", reportPath + "/js");
+        createDirectories(reportPath+"/css");
+        createDirectories(reportPath+"/js");
+        copyAssetsDirectory(SOURCE_CSS_ASSETS, reportPath + "/css");
+        copyAssetsDirectory(SOURCE_JS_ASSETS, reportPath + "/js");
         reportPath = reportPath+"/"+platform;
         createDirectories(reportPath);
         generateHtmlReport(reportPath, runTimeInfo, features);
     }
 
-    public void copyAssetsDirectory(String sourceDirectoryLocation, String destinationDirectoryLocation) {
-        File sourceDirectory = new File(sourceDirectoryLocation);
-        File destinationDirectory = new File(destinationDirectoryLocation);
-        try {
-            FileUtils.copyDirectory(sourceDirectory, destinationDirectory);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    public void copyAssetsDirectory(List<String> sourceFilesPath, String destinationDirectoryLocation) {
+
+        sourceFilesPath.forEach(filePath -> {
+            InputStream in = getClass().getClassLoader().getResourceAsStream(filePath);
+            try {
+                Files.copy(in, Paths.get(destinationDirectoryLocation + File.separator + filePath.substring(filePath.lastIndexOf(File.separator) + 1)));
+            } catch (FileAlreadyExistsException ignored){
+
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
     }
 
     private void generateHtmlReport(String reportPath, RunTimeInfo runTimeInfo, List<Feature> features) throws IOException {
@@ -65,10 +87,9 @@ public class CustomReportBuilder {
         reportData.put("results", results);
         reportData.put("modals", modals);
 
-
-        File thisFile = new File(reportPath + "/" + now.toString() + ".html");
+        File thisFile = new File(reportPath + "/" + now + ".html");
         BufferedWriter writer = new BufferedWriter(new FileWriter(thisFile, false));
-        final InputStream in = getClass().getClassLoader().getResourceAsStream(String.format("%s/index.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
+        final InputStream in = getClass().getClassLoader().getResourceAsStream(String.format("%s/index.mustache", HtmlReportBuilder.MUSTACHE_TEMPLATES_DIR));
         assert in != null;
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
@@ -80,13 +101,12 @@ public class CustomReportBuilder {
         writer.close();
     }
 
-    private void createImageScript(Writer writer, List<Feature> reportFeatures) throws IOException {
-/*
+    private void createImageScript(Writer writer, List<Feature> features) throws IOException {
         final List<Embedding> embeddings = new ArrayList<>();
 
-        reportFeatures.stream().map(Feature::getScenarios)
+        features.stream().map(Feature::getScenarios)
                 .flatMap(Collection::stream)
-                .flatMap(t -> t.getBefore().stream())
+                .flatMap(t -> t.getSteps().stream())
                 .flatMap(t -> t.getEmbeddings().stream())
                 .forEach(embeddings::add);
 
@@ -98,11 +118,17 @@ public class CustomReportBuilder {
             writer.write("document.getElementById('");
             writer.write(embedding.getEmbeddingId());
             writer.write("').src='data:image;base64,");
-            writer.write(embedding.getData());
+       /*     // Todo:
+            byte[] data = embedding.getData();
+            StringBuffer stringBuffer = new StringBuffer();
+            for (byte datum : data) {
+                stringBuffer.append(datum);
+            }*/
+            writer.write(Base64.getEncoder().encodeToString(embedding.getData()));
             writer.write("'\n\n");
         }
 
-        writer.write("</script>");*/
+        writer.write("</script>");
     }
 
     private void createDirectories(String dirPath) throws IOException {

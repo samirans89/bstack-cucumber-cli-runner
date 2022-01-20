@@ -2,6 +2,7 @@ package com.browserstack;
 
 import com.browserstack.webdriver.core.WebDriverFactory;
 import io.cucumber.core.eventbus.EventBus;
+import io.cucumber.core.exception.UnrecoverableExceptions;
 import io.cucumber.core.feature.FeatureParser;
 import io.cucumber.core.filter.Filters;
 import io.cucumber.core.gherkin.Feature;
@@ -55,6 +56,19 @@ final class WebDriverRuntime {
 
         // Feature Scanning
         this.context.startTestRun();
+        this.execute(() -> {
+            this.context.runBeforeAllHooks();
+            this.runFeatures();
+        });
+
+        // Context closure for single execution
+        if (!isRerunEnabled) {
+            batchExecutionRunner.closeExecutionContext();
+        }
+
+    }
+
+    private void runFeatures(){
         List<Feature> features = this.featureSupplier.get();
         CucumberExecutionContext cucumberExecutionContext = this.context;
         Objects.requireNonNull(cucumberExecutionContext);
@@ -70,15 +84,17 @@ final class WebDriverRuntime {
                     return pickles.stream().map(pickle -> new PickleFeature(pickle, feature));
                 })
                 .forEach(pickleFeature -> webDriverFactory.getPlatforms().forEach(platform -> executions.add(new Execution(platform, pickleFeature.getFeature(), pickleFeature.getPickle()))));
-
         // Pickle execution
         batchExecutionRunner.submitExecutions(0, executions);
+    }
 
-        // Context closure for single execution
-        if (!isRerunEnabled) {
-            batchExecutionRunner.closeExecutionContext();
+
+    private void execute(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable var3) {
+            UnrecoverableExceptions.rethrowIfUnrecoverable(var3);
         }
-
     }
 
     public static class Builder {
@@ -139,8 +155,7 @@ final class WebDriverRuntime {
                 plugins.setEventBusOnEventListenerPlugins(this.eventBus);
             }
             EventBus eventBus = this.eventBus;
-            TypeRegistryConfigurerSupplier typeRegistryConfigurerSupplier = new ScanningTypeRegistryConfigurerSupplier(this.classLoader, this.runtimeOptions);
-            RunnerSupplier runnerSupplier = this.runtimeOptions.isMultiThreaded() ? new ThreadLocalRunnerSupplier(this.runtimeOptions, this.eventBus, backendSupplier, objectFactorySupplier, typeRegistryConfigurerSupplier) : new SingletonRunnerSupplier(this.runtimeOptions, this.eventBus, (BackendSupplier) backendSupplier, (ObjectFactorySupplier) objectFactorySupplier, typeRegistryConfigurerSupplier);
+            RunnerSupplier runnerSupplier = this.runtimeOptions.isMultiThreaded() ? new ThreadLocalRunnerSupplier(this.runtimeOptions, this.eventBus, backendSupplier, objectFactorySupplier) : new SingletonRunnerSupplier(this.runtimeOptions, this.eventBus, backendSupplier, objectFactorySupplier);
             FeatureParser parser = new FeatureParser(eventBus::generateId);
             FeatureSupplier featureSupplier = new FeaturePathFeatureSupplier(this.classLoader, this.runtimeOptions, parser);
             Predicate<Pickle> filter = new Filters(this.runtimeOptions);

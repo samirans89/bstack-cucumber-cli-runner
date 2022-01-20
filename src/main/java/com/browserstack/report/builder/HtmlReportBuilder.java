@@ -1,9 +1,6 @@
 package com.browserstack.report.builder;
 
-import com.browserstack.report.models.Feature;
-import com.browserstack.report.models.Result;
-import com.browserstack.report.models.Scenario;
-import com.browserstack.report.models.Step;
+import com.browserstack.report.models.*;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import io.cucumber.plugin.event.HookType;
@@ -12,9 +9,11 @@ import org.apache.commons.lang3.EnumUtils;
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class HtmlReportBuilder {
 
+    public static final String MUSTACHE_TEMPLATES_DIR = "report/templates";
     private static final String PASSED = "Passed";
     private static final String FAILED = "Failed";
     private static final String PASSED_AFTER_RERUN = "Passed in Rerun";
@@ -75,13 +74,13 @@ public class HtmlReportBuilder {
     private HtmlReportBuilder(String reportPath, List<Feature> featureList) {
         this.reportPath = reportPath;
         this.featureList = featureList;
-        this.featureTemplate = readTemplate(String.format("%s/feature.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.modalTemplate = readTemplate(String.format("%s/modal.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.modalStepTemplate = readTemplate(String.format("%s/modal_step.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.modalEnvironmentTemplate = readTemplate(String.format("%s/modal_environment.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.modalRowTemplate = readTemplate(String.format("%s/modal_row.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.scenarioTemplate = readTemplate(String.format("%s/scenario.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
-        this.scenarioTagTemplate = readTemplate(String.format("%s/scenario_tag.mustache", ReporterConstants.MUSTACHE_TEMPLATES_DIR));
+        this.featureTemplate = readTemplate(String.format("%s/feature.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.modalTemplate = readTemplate(String.format("%s/modal.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.modalStepTemplate = readTemplate(String.format("%s/modal_step.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.modalEnvironmentTemplate = readTemplate(String.format("%s/modal_environment.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.modalRowTemplate = readTemplate(String.format("%s/modal_row.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.scenarioTemplate = readTemplate(String.format("%s/scenario.mustache", MUSTACHE_TEMPLATES_DIR));
+        this.scenarioTagTemplate = readTemplate(String.format("%s/scenario_tag.mustache", MUSTACHE_TEMPLATES_DIR));
     }
 
     public static HtmlReportBuilder create(String reportPath, List<Feature> featureList) {

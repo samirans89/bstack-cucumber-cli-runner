@@ -64,8 +64,6 @@ This plugin collects metadata about the tests after the build completion. It gen
 |BuildCompleted|Record build end time & Generate reports
 
 Note : This plugin takes a parameter for report path.
-Ensure you have the mustache templates, js and css ready in `src/test/resources/reporter` directory.
-
 
 **Other Classes**
 
@@ -74,7 +72,9 @@ Ensure you have the mustache templates, js and css ready in `src/test/resources/
 BatchExecutionRunner|Executes tests on provided list of platforms
 Execution|Current combination of pickle & Platform
 WebDriverRuntime|Entry point for running tests
-WebDriverTestRunner|External Facing API
+WebDriverTestRunner|Cucumber CLI Runner
+WebDriverRunner| JUnit Test Runner Class
+WebDriverOptions| Options for WebDriverRunner
 
 
 **How to run a test with this library?**
@@ -99,31 +99,40 @@ mvn clean install
 </dependency>
 ```
 
-4. Run the tests within your framework with ``WebDriverTestRunner`` and required ``CucumberOptions``
+4. Run the tests within your framework with ``WebDriverRunner`` and required ``WebDriverOptions``
 
 ```java
-public class Test{
-    public void testMethod(){
-        String[] argv = new String[]{
-                CommandlineOptions.GLUE, ""};
-        WebDriverTestRunner.run(true,argv);
-    }
+@RunWith(WebDriverRunner.class)
+@WebDriverOptions(
+        thread = 5,
+        cucumberOptions = @CucumberOptions(
+                features = "src/test/resources/features/com/browserstack",
+                name = "End to End Scenario"
+        )
+)
+public class RunCucumberTest {
+
 }
 ```
 
 5. Enable required plugins and options you need
 
 ```java
-public class Test{
-    public void testMethod(){
-        String[] argv = new String[]{
-                CommandlineOptions.THREADS,"25",
-                CommandlineOptions.PLUGIN,"com.browserstack.rerun.RerunExecutionManager:2",
-                CommandlineOptions.PLUGIN,"com.browserstack.report.CustomReportListener:target/reports",
-                CommandlineOptions.NAME,"End to End Scenario",
-                CommandlineOptions.GLUE, ""};
-        WebDriverTestRunner.run(true,argv);
-    }
+@RunWith(WebDriverRunner.class)
+@WebDriverOptions(
+        thread = 5,
+        rerun = true,
+        cucumberOptions = @CucumberOptions(
+                features = "src/test/resources/features/com/browserstack",
+                name = "End to End Scenario",
+                plugin = {"pretty",
+                        "com.browserstack.report.CustomReportListener:custom/reports",
+                        "com.browserstack.rerun.RerunExecutionManager:2"},
+                monochrome = true
+        )
+)
+public class RunCucumberTest {
+
 }
 ```
 
@@ -131,7 +140,7 @@ public class Test{
 ```java
 public class BaseStep {
     public WebDriver getWebDriver(){
-        return WebDriverTestRunner.getWebDriver();
+        return WebDriverRunner.getWebDriver();
     }
     
 }

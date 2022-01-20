@@ -1,0 +1,18 @@
+<hr>
+<span class="row pl-lg-9">
+    <div class="col pl-lg-4">
+        <a href="" data-toggle="modal" data-target="#{{modal_target}}" id="child-row" class="col-lg-9">{{scenario_name}}</a>
+        <div class="col-lg-9" id="child-col">
+                {{#scenario_tags}}
+                    {{{.}}}
+                {{/scenario_tags}}
+            </div>
+    </div>
+    <span class="col-lg-2" id="child-col">
+        <button type="button"  class="float-right btn btn-{{scenario_badge}} btn-block" >{{scenario_result}}
+            {{#scenario_rerun_index}}
+                <span class="badge badge-light">{{scenario_rerun_index}}</span>
+            {{/scenario_rerun_index}}
+        </button>
+    </span>
+</span>
