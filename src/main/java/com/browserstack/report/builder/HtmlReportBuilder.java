@@ -1,15 +1,27 @@
 package com.browserstack.report.builder;
 
-import com.browserstack.report.models.*;
+import com.browserstack.report.models.Feature;
+import com.browserstack.report.models.Result;
+import com.browserstack.report.models.Scenario;
+import com.browserstack.report.models.Step;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import io.cucumber.plugin.event.HookType;
 import org.apache.commons.lang3.EnumUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class HtmlReportBuilder {
 
@@ -31,7 +43,6 @@ public class HtmlReportBuilder {
     private static final String SCENARIO_NAME = "scenario_name";
     private static final String SCENARIO_BADGE = "scenario_badge";
     private static final String SCENARIO_RESULT = "scenario_result";
-    private static final String SCENARIO_PLATFORM = "scenario_platform";
     private static final String SCENARIO_TAGS = "scenario_tags";
     private static final String RERUN_INDEX = "scenario_rerun_index";
     private static final String MODAL_TARGET = "modal_target";
@@ -61,7 +72,6 @@ public class HtmlReportBuilder {
         String status = result.getStatus();
         return status.equalsIgnoreCase(PASSED) ? SUCCESS : status.equalsIgnoreCase(FAILED) ? DANGER : WARNING;
     };
-    private final String reportPath;
     private final List<Feature> featureList;
     private final Mustache featureTemplate;
     private final Mustache modalTemplate;
@@ -71,8 +81,7 @@ public class HtmlReportBuilder {
     private final Mustache scenarioTemplate;
     private final Mustache scenarioTagTemplate;
 
-    private HtmlReportBuilder(String reportPath, List<Feature> featureList) {
-        this.reportPath = reportPath;
+    private HtmlReportBuilder(List<Feature> featureList) {
         this.featureList = featureList;
         this.featureTemplate = readTemplate(String.format("%s/feature.mustache", MUSTACHE_TEMPLATES_DIR));
         this.modalTemplate = readTemplate(String.format("%s/modal.mustache", MUSTACHE_TEMPLATES_DIR));
@@ -83,8 +92,8 @@ public class HtmlReportBuilder {
         this.scenarioTagTemplate = readTemplate(String.format("%s/scenario_tag.mustache", MUSTACHE_TEMPLATES_DIR));
     }
 
-    public static HtmlReportBuilder create(String reportPath, List<Feature> featureList) {
-        return new HtmlReportBuilder(reportPath, featureList);
+    public static HtmlReportBuilder create(List<Feature> featureList) {
+        return new HtmlReportBuilder(featureList);
     }
 
     private static void addNestedMap(HashMap<String, Object> source, String sourceKey,
@@ -249,39 +258,18 @@ public class HtmlReportBuilder {
     }
 
     private String createModalRow(String rowInfo) {
-
         final LinkedHashMap<String, Object> rowInfoData = new LinkedHashMap<>();
         rowInfoData.put(ROW_INFO, rowInfo);
-
         return createFromTemplate(modalRowTemplate, rowInfoData);
     }
 
     private String createEnvironmentInfoModal() {
         final List<String> envData = new ArrayList<>();
-
-        //final String envInfo = courgetteProperties.getCourgetteOptions().environmentInfo().trim();
-
-//        final String[] values = envInfo.split(";");
-//
-//        for (String value : values) {
-//            String[] keyValue = value.trim().split("=");
-//
-//            if (keyValue.length == 2) {
-//                envData.add(keyValue[0].trim() + " = " + keyValue[1].trim());
-//            }
-//        }
-
-//        if (envData.isEmpty()) {
         envData.add("No additional environment information provided.");
-        //      }
-
         final LinkedHashMap<String, Object> environmentInfoData = new LinkedHashMap<>();
-
         final LinkedList<String> rowInfo = new LinkedList<>();
         envData.forEach(info -> rowInfo.add(createModalRow(info)));
-
         environmentInfoData.put(MODAL_BODY, rowInfo);
-
         return createFromTemplate(modalEnvironmentTemplate, environmentInfoData);
     }
 

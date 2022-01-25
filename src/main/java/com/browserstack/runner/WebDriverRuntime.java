@@ -1,4 +1,4 @@
-package com.browserstack;
+package com.browserstack.runner;
 
 import com.browserstack.webdriver.core.WebDriverFactory;
 import io.cucumber.core.eventbus.EventBus;
@@ -12,12 +12,30 @@ import io.cucumber.core.order.PickleOrder;
 import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
-import io.cucumber.core.runtime.*;
+import io.cucumber.core.runtime.BackendServiceLoader;
+import io.cucumber.core.runtime.BackendSupplier;
+import io.cucumber.core.runtime.CucumberExecutionContext;
+import io.cucumber.core.runtime.ExitStatus;
+import io.cucumber.core.runtime.FeaturePathFeatureSupplier;
+import io.cucumber.core.runtime.FeatureSupplier;
+import io.cucumber.core.runtime.ObjectFactoryServiceLoader;
+import io.cucumber.core.runtime.ObjectFactorySupplier;
+import io.cucumber.core.runtime.RunnerSupplier;
+import io.cucumber.core.runtime.SingletonObjectFactorySupplier;
+import io.cucumber.core.runtime.SingletonRunnerSupplier;
+import io.cucumber.core.runtime.ThreadLocalObjectFactorySupplier;
+import io.cucumber.core.runtime.ThreadLocalRunnerSupplier;
+import io.cucumber.core.runtime.TimeServiceEventBus;
 import io.cucumber.plugin.Plugin;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -51,21 +69,15 @@ final class WebDriverRuntime {
     }
 
     public void run() {
-
         eventBus.send(new BuildStarted(Instant.now()));
-
-        // Feature Scanning
         this.context.startTestRun();
         this.execute(() -> {
             this.context.runBeforeAllHooks();
             this.runFeatures();
         });
-
-        // Context closure for single execution
         if (!isRerunEnabled) {
             batchExecutionRunner.closeExecutionContext();
         }
-
     }
 
     private void runFeatures(){
@@ -78,13 +90,12 @@ final class WebDriverRuntime {
                 .flatMap((feature) -> {
                     List<Pickle> pickles = feature.getPickles().stream()
                             .filter(this.filter)
-                            .collect(Collectors.collectingAndThen(Collectors.toList(), (list) -> this.pickleOrder.orderPickles(list)))
-                            .stream().limit(this.limit > 0 ? (long) this.limit : 2147483647L)
+                            .collect(Collectors.collectingAndThen(Collectors.toList(), this.pickleOrder::orderPickles))
+                            .stream().limit(this.limit > 0 ? (long) this.limit : Long.MAX_VALUE)
                             .collect(Collectors.toList());
                     return pickles.stream().map(pickle -> new PickleFeature(pickle, feature));
                 })
                 .forEach(pickleFeature -> webDriverFactory.getPlatforms().forEach(platform -> executions.add(new Execution(platform, pickleFeature.getFeature(), pickleFeature.getPickle()))));
-        // Pickle execution
         batchExecutionRunner.submitExecutions(0, executions);
     }
 
@@ -92,13 +103,13 @@ final class WebDriverRuntime {
     private void execute(Runnable runnable) {
         try {
             runnable.run();
-        } catch (Throwable var3) {
-            UnrecoverableExceptions.rethrowIfUnrecoverable(var3);
+        } catch (Throwable throwable) {
+            UnrecoverableExceptions.rethrowIfUnrecoverable(throwable);
         }
     }
 
     public static class Builder {
-        private EventBus eventBus;
+        private final EventBus eventBus;
         private Supplier<ClassLoader> classLoader;
         private RuntimeOptions runtimeOptions;
         private List<Plugin> additionalPlugins;
@@ -142,9 +153,7 @@ final class WebDriverRuntime {
             ObjectFactorySupplier objectFactorySupplier = this.runtimeOptions.isMultiThreaded() ? new ThreadLocalObjectFactorySupplier(objectFactoryServiceLoader) : new SingletonObjectFactorySupplier(objectFactoryServiceLoader);
             BackendSupplier backendSupplier = new BackendServiceLoader(this.classLoader, objectFactorySupplier);
             Plugins plugins = new Plugins(new PluginFactory(), this.runtimeOptions);
-            Iterator pluginIterator = this.additionalPlugins.iterator();
-            while (pluginIterator.hasNext()) {
-                Plugin plugin = (Plugin) pluginIterator.next();
+            for (Plugin plugin : this.additionalPlugins) {
                 plugins.addPlugin(plugin);
             }
             ExitStatus exitStatus = new ExitStatus(this.runtimeOptions);
@@ -185,6 +194,5 @@ final class WebDriverRuntime {
             return feature;
         }
     }
-
 
 }

@@ -1,22 +1,38 @@
 package com.browserstack.report;
 
-import com.browserstack.*;
+import com.browserstack.runner.BatchExecutionStarted;
+import com.browserstack.runner.BuildCompleted;
+import com.browserstack.runner.BuildStarted;
+import com.browserstack.runner.Execution;
+import com.browserstack.runner.ExecutionStarted;
+import com.browserstack.runner.RuntimeCreated;
 import com.browserstack.report.builder.CustomReportBuilder;
-import com.browserstack.report.models.*;
+import com.browserstack.report.models.Embedding;
+import com.browserstack.report.models.Feature;
+import com.browserstack.report.models.ModelUtil;
+import com.browserstack.report.models.Scenario;
 import com.browserstack.report.models.Step;
 import com.browserstack.webdriver.core.WebDriverFactory;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.plugin.ConcurrentEventListener;
-import io.cucumber.plugin.event.*;
+import io.cucumber.plugin.event.EmbedEvent;
+import io.cucumber.plugin.event.EventPublisher;
+import io.cucumber.plugin.event.TestCaseFinished;
+import io.cucumber.plugin.event.TestStepFinished;
+import io.cucumber.plugin.event.TestStepStarted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-public class CustomReportListener implements ConcurrentEventListener {
+public final class CustomReportListener implements ConcurrentEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomReportBuilder.class);
     private static Map<String, List<Scenario>> scenarioMap = new HashMap<>();

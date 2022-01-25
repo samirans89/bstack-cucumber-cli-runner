@@ -1,6 +1,6 @@
 package com.browserstack.junit;
 
-import com.browserstack.WebDriverTestRunner;
+import com.browserstack.runner.WebDriverTestRunner;
 import com.browserstack.webdriver.WebDriverManager;
 import io.cucumber.core.options.CucumberOptionsAnnotationParser;
 import io.cucumber.core.options.RuntimeOptions;
@@ -26,8 +26,7 @@ public class WebDriverRunner extends Runner {
 
     @Override
     public void run(RunNotifier runNotifier) {
-        WebDriverOptions webDriverOptions =
-                (WebDriverOptions) testClass.getAnnotation(WebDriverOptions.class);
+        WebDriverOptions webDriverOptions = (WebDriverOptions) testClass.getAnnotation(WebDriverOptions.class);
         Objects.requireNonNull(webDriverOptions,"WebDriverOptions Undefined");
         runNotifier.fireTestRunStarted(getDescription());
         RuntimeOptions runtimeOptions = new CucumberOptionsAnnotationParser()

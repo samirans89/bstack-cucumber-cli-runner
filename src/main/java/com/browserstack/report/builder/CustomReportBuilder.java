@@ -5,18 +5,28 @@ import com.browserstack.report.models.Embedding;
 import com.browserstack.report.models.Feature;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
-import org.apache.commons.io.FileUtils;
 
-import java.io.*;
-import java.net.URISyntaxException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Writer;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class CustomReportBuilder {
+public final class CustomReportBuilder {
 
     List<String> SOURCE_CSS_ASSETS = new ArrayList<>(
             Arrays.asList("report/css/chartjs.min.css"
@@ -29,7 +39,6 @@ public class CustomReportBuilder {
                     , "report/js/dataTables.bootstrap4.min.js"
                     , "report/js/jquery.dataTables.min.js"
                     , "report/js/jquery-3.5.1.slim.min.js"));
-
 
     private CustomReportBuilder() {
     }
@@ -54,6 +63,7 @@ public class CustomReportBuilder {
         sourceFilesPath.forEach(filePath -> {
             InputStream in = getClass().getClassLoader().getResourceAsStream(filePath);
             try {
+                assert in != null;
                 Files.copy(in, Paths.get(destinationDirectoryLocation + File.separator + filePath.substring(filePath.lastIndexOf(File.separator) + 1)));
             } catch (FileAlreadyExistsException ignored){
 
@@ -65,7 +75,7 @@ public class CustomReportBuilder {
     }
 
     private void generateHtmlReport(String reportPath, RunTimeInfo runTimeInfo, List<Feature> features) throws IOException {
-        final HtmlReportBuilder htmlReportBuilder = HtmlReportBuilder.create(reportPath, features);
+        final HtmlReportBuilder htmlReportBuilder = HtmlReportBuilder.create(features);
         final List<String> results = htmlReportBuilder.getHtmlTableFeatureRows();
         final List<String> modals = htmlReportBuilder.getHtmlModals();
         final HashMap<String, Object> reportData = new HashMap<>();
@@ -118,12 +128,6 @@ public class CustomReportBuilder {
             writer.write("document.getElementById('");
             writer.write(embedding.getEmbeddingId());
             writer.write("').src='data:image;base64,");
-       /*     // Todo:
-            byte[] data = embedding.getData();
-            StringBuffer stringBuffer = new StringBuffer();
-            for (byte datum : data) {
-                stringBuffer.append(datum);
-            }*/
             writer.write(Base64.getEncoder().encodeToString(embedding.getData()));
             writer.write("'\n\n");
         }

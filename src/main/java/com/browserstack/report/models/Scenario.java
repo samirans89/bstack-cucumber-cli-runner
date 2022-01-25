@@ -10,7 +10,7 @@ public class Scenario {
     private String name;
     private int line;
     private String keyword;
-    private List<Step> steps = new ArrayList<>();
+    private final List<Step> steps = new ArrayList<>();
     private List<Tag> tags = new ArrayList<>();
     private int rerunIndex;
 

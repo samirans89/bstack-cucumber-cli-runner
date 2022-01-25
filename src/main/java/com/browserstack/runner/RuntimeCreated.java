@@ -1,4 +1,4 @@
-package com.browserstack;
+package com.browserstack.runner;
 
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.plugin.event.Event;

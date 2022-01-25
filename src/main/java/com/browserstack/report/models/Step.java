@@ -11,9 +11,9 @@ public class Step {
     private String name;
     private String keyword;
     private Result result;
-    private List<Embedding> embeddings = new ArrayList<>();
-    private List<String> output = new ArrayList<>();
-    private List<String> rowData = new ArrayList<>();
+    private final List<Embedding> embeddings = new ArrayList<>();
+    private final List<String> output = new ArrayList<>();
+    private final List<String> rowData = new ArrayList<>();
 
     public Step() {
     }

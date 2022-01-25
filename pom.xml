@@ -9,16 +9,18 @@
     <version>0.0.1</version>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <wedriver.core.version>0.0.1</wedriver.core.version>
         <selenium-java.version>3.141.59</selenium-java.version>
-        <cucumber.version>7.2.3</cucumber.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <logback.version>1.2.3</logback.version>
-        <jackson.version>2.12.2</jackson.version>
+        <cucumber-java.version>7.2.3</cucumber-java.version>
+        <slf4j.version>1.7.33</slf4j.version>
+        <logback.version>1.2.10</logback.version>
+        <jackson.version>2.13.1</jackson.version>
         <mustache-java.version>0.9.10</mustache-java.version>
         <junit.version>4.13.2</junit.version>
+        <cucumber-junit.version>7.2.3</cucumber-junit.version>
     </properties>
 
     <dependencies>
@@ -35,7 +37,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>${cucumber.version}</version>
+            <version>${cucumber-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -65,7 +67,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
-            <version>7.2.3</version>
+            <version>${cucumber-junit.version}</version>
         </dependency>
     </dependencies>
 </project>

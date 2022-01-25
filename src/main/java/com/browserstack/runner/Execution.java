@@ -1,4 +1,4 @@
-package com.browserstack;
+package com.browserstack.runner;
 
 import com.browserstack.webdriver.config.Platform;
 import io.cucumber.core.gherkin.Feature;

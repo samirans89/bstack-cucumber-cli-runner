@@ -1,9 +1,9 @@
 package com.browserstack.rerun;
 
-import com.browserstack.BatchExecutionCompleted;
-import com.browserstack.BatchExecutionRunner;
-import com.browserstack.Execution;
-import com.browserstack.ExecutionStarted;
+import com.browserstack.runner.BatchExecutionCompleted;
+import com.browserstack.runner.BatchExecutionRunner;
+import com.browserstack.runner.Execution;
+import com.browserstack.runner.ExecutionStarted;
 import io.cucumber.plugin.ConcurrentEventListener;
 import io.cucumber.plugin.event.EventPublisher;
 import io.cucumber.plugin.event.TestCaseFinished;

@@ -1,7 +1,7 @@
 package com.browserstack.webdriver;
 
 
-import com.browserstack.WebDriverCreated;
+import com.browserstack.runner.WebDriverCreated;
 import com.browserstack.webdriver.core.WebDriverFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,22 +63,16 @@ public final class WebDriverManager implements ConcurrentEventListener {
     private String createExecutorScript(String status, String reason) {
         ObjectNode rootNode = objectMapper.createObjectNode();
         ObjectNode argumentsNode = objectMapper.createObjectNode();
-
-        // Read only the first line of the error message
         reason = reason.split("\n")[0];
-        // Limit the error message to only 255 characters
         if (reason.length() >= 255) {
             reason = reason.substring(0, 255);
         }
-        // Replacing all the special characters with whitespace
-        reason.replaceAll("^[^a-zA-Z0-9]", " ");
-
+        reason = reason.replaceAll("^[^a-zA-Z0-9]", " ");
         argumentsNode.put("status", status);
         argumentsNode.put("reason", reason);
-
         rootNode.put("action", "setSessionStatus");
         rootNode.set("arguments", argumentsNode);
-        String executorStr = "";
+        String executorStr;
         try {
             executorStr = objectMapper.writeValueAsString(rootNode);
         } catch (JsonProcessingException e) {

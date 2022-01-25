@@ -5,10 +5,10 @@ import java.util.List;
 
 public class Feature {
 
-    private String featureId;
-    private String name;
-    private String uri;
-    private List<Scenario> scenarios = new ArrayList<>();
+    private final String featureId;
+    private final String name;
+    private final String uri;
+    private final List<Scenario> scenarios = new ArrayList<>();
 
     public Feature(String featureId, String name, String uri) {
         this.featureId = featureId;

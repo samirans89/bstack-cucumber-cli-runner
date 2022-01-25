@@ -1,6 +1,6 @@
 package com.browserstack.report.models;
 
-import com.browserstack.Execution;
+import com.browserstack.runner.Execution;
 import io.cucumber.plugin.event.HookTestStep;
 import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.TestStep;
