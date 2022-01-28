@@ -32,6 +32,10 @@ public final class WebDriverManager implements ConcurrentEventListener {
         return webDriverFactory.getTestEndpoint();
     }
 
+    public static WebDriverFactory getWebDriverFactory() {
+        return webDriverFactory;
+    }
+
     @Override
     public void setEventPublisher(EventPublisher eventPublisher) {
         eventPublisher.registerHandlerFor(WebDriverCreated.class, this::grabWebDriver);
