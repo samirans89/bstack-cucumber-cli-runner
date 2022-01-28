@@ -97,7 +97,9 @@ public final class CustomReportBuilder {
         reportData.put("results", results);
         reportData.put("modals", modals);
 
-        File thisFile = new File(reportPath + "/" + now + ".html");
+        String normalizedTimestamp = now.toString().replaceAll("([:.])", "-");
+
+        File thisFile = new File(reportPath + "/" + normalizedTimestamp + ".html");
         BufferedWriter writer = new BufferedWriter(new FileWriter(thisFile, false));
         final InputStream in = getClass().getClassLoader().getResourceAsStream(String.format("%s/index.mustache", HtmlReportBuilder.MUSTACHE_TEMPLATES_DIR));
         assert in != null;
