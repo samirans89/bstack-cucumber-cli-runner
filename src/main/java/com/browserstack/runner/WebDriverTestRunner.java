@@ -20,12 +20,11 @@ public final class WebDriverTestRunner {
     }
 
 
-    private static void run(boolean isRerunEnabled,String threads, RuntimeOptions annotationOptions, ClassLoader classLoader, Plugin... additionalPlugins) {
+    private static void run(boolean isRerunEnabled, String threads, RuntimeOptions annotationOptions, ClassLoader classLoader, Plugin... additionalPlugins) {
         RuntimeOptions propertiesFileOptions = (new CucumberPropertiesParser()).parse(CucumberProperties.fromPropertiesFile()).build(annotationOptions);
         RuntimeOptions environmentOptions = (new CucumberPropertiesParser()).parse(CucumberProperties.fromEnvironment()).build(propertiesFileOptions);
         RuntimeOptions systemOptions = (new CucumberPropertiesParser()).parse(CucumberProperties.fromSystemProperties()).build(environmentOptions);
         CommandlineOptionsParser commandlineOptionsParser = new CommandlineOptionsParser(System.out);
-        threads = System.getProperty("parallel.threads",threads);
         RuntimeOptions runtimeOptions = commandlineOptionsParser.parse(CommandlineOptions.THREADS, threads).addDefaultGlueIfAbsent().addDefaultFeaturePathIfAbsent().addDefaultSummaryPrinterIfNotDisabled().enablePublishPlugin().build(systemOptions);
         Optional<Byte> exitStatus = commandlineOptionsParser.exitStatus();
          if (!exitStatus.isPresent()) {

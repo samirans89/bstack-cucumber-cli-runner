@@ -16,16 +16,20 @@ import org.openqa.selenium.WebDriver;
 public final class WebDriverManager implements ConcurrentEventListener {
 
     private static final ThreadLocal<WebDriver> webDriverThreadLocal = new ThreadLocal<>();
-    private final WebDriverFactory webDriverFactory;
+    private static WebDriverFactory webDriverFactory;
     private final ObjectMapper objectMapper;
 
     public WebDriverManager() {
-        this.webDriverFactory = WebDriverFactory.getInstance();
+        webDriverFactory = WebDriverFactory.getInstance();
         this.objectMapper = new ObjectMapper();
     }
 
     public static WebDriver getWebDriver() {
         return webDriverThreadLocal.get();
+    }
+
+    public static String getTestEndpoint() {
+        return webDriverFactory.getTestEndpoint();
     }
 
     @Override

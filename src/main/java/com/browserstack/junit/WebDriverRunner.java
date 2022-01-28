@@ -39,4 +39,8 @@ public class WebDriverRunner extends Runner {
     public static WebDriver getWebDriver() {
         return WebDriverManager.getWebDriver();
     }
+
+    public static String getTestEndpoint() {
+        return WebDriverManager.getWebDriverFactory().getTestEndpoint();
+    }
 }
