@@ -17,7 +17,7 @@
         <cucumber-java.version>7.2.3</cucumber-java.version>
         <slf4j.version>1.7.33</slf4j.version>
         <logback.version>1.2.10</logback.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.4.2</jackson.version>
         <mustache-java.version>0.9.10</mustache-java.version>
         <junit.version>4.13.2</junit.version>
         <cucumber-junit.version>7.2.3</cucumber-junit.version>
